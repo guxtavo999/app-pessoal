@@ -71,7 +71,7 @@ export default {
       saveFailed = !saveAgenda(items);
     }
 
-    el.addEventListener('click', e => {
+    function onClick(e) {
       const btn = e.target.closest('button');
       if (!btn) return;
       if (btn.dataset.act === 'new') return renderForm(null);
@@ -86,9 +86,9 @@ export default {
         const item = items.find(i => i.id === btn.dataset.id);
         if (item) renderForm(item);
       }
-    });
+    }
 
-    el.addEventListener('submit', e => {
+    function onSubmit(e) {
       e.preventDefault();
       const form = e.target;
       const draft = {
@@ -108,7 +108,11 @@ export default {
       else items.push({ id: editingId ?? newId(), ...draft });
       persist();
       renderList();
-    });
+    }
+
+    // #view é compartilhado entre abas: estes ouvintes precisam sair no cleanup.
+    el.addEventListener('click', onClick);
+    el.addEventListener('submit', onSubmit);
 
     function schedule() {
       clearTimeout(timer);
@@ -136,6 +140,8 @@ export default {
 
     return () => {
       clearTimeout(timer);
+      el.removeEventListener('click', onClick);
+      el.removeEventListener('submit', onSubmit);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('pageshow', refresh);
       window.removeEventListener('focus', refresh);
