@@ -24,7 +24,7 @@ function write(key, value, store) {
 export function loadDay(key, store) {
   try {
     const data = JSON.parse(read('agua:' + key, store));
-    if (Array.isArray(data) && data.length === SIZE) return data.map(Boolean);
+    if (Array.isArray(data) && data.length === SIZE) return data.map(v => v === true);
   } catch { /* dado corrompido */ }
   return blank();
 }

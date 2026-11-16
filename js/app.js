@@ -15,7 +15,7 @@ function show(id) {
   if (current === tab.id) return;
   if (typeof cleanup === 'function') cleanup();
   view.replaceChildren();
-  view.scrollTop = 0;
+  window.scrollTo(0, 0);
   cleanup = tab.mount(view) ?? null;
   current = tab.id;
   setLastTab(tab.id);

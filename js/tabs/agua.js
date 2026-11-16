@@ -95,7 +95,8 @@ export default {
       if (document.visibilityState === 'visible') refresh();
     }
 
-    el.querySelector('.cups').addEventListener('click', e => {
+    const cupsEl = el.querySelector('.cups');
+    cupsEl.addEventListener('click', e => {
       const btn = e.target.closest('.cup');
       if (!btn) return;
       const i = Number(btn.dataset.i);
@@ -104,6 +105,7 @@ export default {
       saveError.hidden = saveDay(key, marks);
       render();
     });
+    cupsEl.addEventListener('touchstart', () => {}, { passive: true });
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('pageshow', refresh);
     window.addEventListener('focus', refresh);
