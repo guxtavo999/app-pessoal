@@ -1,6 +1,6 @@
 # App Pessoal
 
-Organizador pessoal para iPhone que funciona offline: abas Rotina (em breve) e Água.
+Organizador pessoal para iPhone que funciona offline: abas Rotina, Água e Agenda.
 
 ## Instalar no iPhone
 

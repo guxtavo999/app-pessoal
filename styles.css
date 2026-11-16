@@ -9,6 +9,10 @@
   --water-deep: #1667d9;
   --late: #d93b3b;
   --late-soft: #fdeaea;
+  --week: #1f9d55;
+  --week-soft: #e2f5ea;
+  --near: #b07d00;
+  --near-soft: #fff4d1;
   --tabbar-h: 58px;
   color-scheme: light dark;
 }
@@ -25,6 +29,10 @@
     --water-deep: #7db8ff;
     --late: #ff6b6b;
     --late-soft: #3a1c22;
+    --week: #4cd08a;
+    --week-soft: #12301f;
+    --near: #f2c230;
+    --near-soft: #3a3010;
   }
 }
 
@@ -232,3 +240,63 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .task.late { background: var(--late-soft); border-color: var(--late); }
 .task.late .box { border-color: var(--late); }
 .task.late .late-tag { display: inline; }
+
+/* ---------- Agenda ---------- */
+.btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn.primary { background: var(--water); border-color: var(--water); color: #fff; }
+.btn.danger { width: 100%; margin-top: 12px; color: var(--late); border-color: var(--late); background: var(--late-soft); }
+
+.appts { display: flex; flex-direction: column; gap: 10px; }
+.empty-inline { margin-top: 20vh; text-align: center; }
+.empty-inline .empty-title { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
+.empty-inline .empty-text { margin: 0; color: var(--muted); }
+
+.appt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.appt .when { font-size: 13px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+.appt .text { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; white-space: pre-wrap; }
+.appt.week { background: var(--week-soft); border-color: var(--week); }
+.appt.near { background: var(--near-soft); border-color: var(--near); }
+.appt.today { background: var(--late-soft); border-color: var(--late); }
+.appt.week .when { color: var(--week); }
+.appt.near .when { color: var(--near); }
+.appt.today .when { color: var(--late); }
+
+.appt-form { display: flex; flex-direction: column; gap: 16px; }
+.appt-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.appt-form input, .appt-form textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+}
+.appt-form textarea { resize: vertical; }
+.form-error { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--late-soft); color: var(--late); font-size: 14px; font-weight: 600; }
+.form-error[hidden] { display: none; }
+.form-actions { display: flex; gap: 10px; }
+.form-actions .btn { flex: 1; }
