@@ -39,7 +39,7 @@ Trocar o placeholder "Em breve" da aba **Rotina** por uma lista de tarefas do di
 ## Decisões minhas (para o usuário conferir)
 
 - Topo da aba: "Rotina" com "Hoje" e um contador "2 de 5 feitas".
-- Visual do atrasado: borda e fundo avermelhados na linha + a palavra "atrasado" à direita. Marcada: mesmo verde/azul de "feito" da Água adaptado à cor da Rotina (a cor de destaque do app).
+- Visual do atrasado: borda e fundo avermelhados na linha + a palavra "atrasado" à direita. Marcada: mesmo comportamento visual da Água (quadrado preenchido com X, linha com fundo suave), usando a cor de destaque do app.
 - O horário faz parte do texto da tarefa, como o usuário escreveu ("11:00 Topiramato").
 - Testes em `node --test` para: lista/ordem, gravação por id (incl. dado corrompido), regra de atrasado.
 - Deploy: aumentar `CACHE_VERSION`, incluir `js/routine.js` em `ASSETS` do `sw.js`.
