@@ -1,3 +1,5 @@
+import { TASKS } from './routine.js';
+
 const SIZE = 6;
 const PREFIX = 'app-pessoal:'; // a origem <usuario>.github.io é compartilhada com outros projetos
 const blank = () => Array(SIZE).fill(false);
@@ -31,6 +33,24 @@ export function loadDay(key, store) {
 
 export function saveDay(key, marks, store) {
   return write('agua:' + key, JSON.stringify(marks.map(Boolean)), store);
+}
+
+// Rotina: marcações guardadas por id da tarefa ({ id: true }), não por posição.
+export function loadRoutineDay(key, store) {
+  const marks = {};
+  try {
+    const data = JSON.parse(read('rotina:' + key, store));
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      for (const { id } of TASKS) if (data[id] === true) marks[id] = true;
+    }
+  } catch { /* dado corrompido */ }
+  return marks;
+}
+
+export function saveRoutineDay(key, marks, store) {
+  const clean = {};
+  for (const { id } of TASKS) if (marks[id] === true) clean[id] = true;
+  return write('rotina:' + key, JSON.stringify(clean), store);
 }
 
 export function getLastTab(store) {

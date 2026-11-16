@@ -9,6 +9,7 @@ const ASSETS = [
   './js/app.js',
   './js/date.js',
   './js/water.js',
+  './js/routine.js',
   './js/storage.js',
   './js/tabs/rotina.js',
   './js/tabs/agua.js',
