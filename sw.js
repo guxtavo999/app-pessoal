@@ -1,5 +1,5 @@
 // Para publicar uma atualização: aumente CACHE_VERSION.
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE = `app-pessoal-${CACHE_VERSION}`;
 const ASSETS = [
   './',
