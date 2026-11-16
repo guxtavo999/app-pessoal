@@ -46,6 +46,7 @@ export default {
     el.innerHTML = `
       <header class="page-head"><h1>Água</h1><span class="sub">Hoje</span></header>
       <p class="water-total" aria-live="polite"><strong></strong><span></span></p>
+      <p class="save-error" role="alert" hidden>Não foi possível salvar neste aparelho. A marcação pode se perder ao fechar o app.</p>
       <section class="water">
         <div class="cups">
           ${CUPS.map((cup, i) => `
@@ -60,6 +61,7 @@ export default {
     const buttons = [...el.querySelectorAll('.cup')];
     const totalBox = el.querySelector('.water-total');
     const level = el.querySelector('.level');
+    const saveError = el.querySelector('.save-error');
 
     function render() {
       const total = totalMl(marks);
@@ -99,10 +101,12 @@ export default {
       const i = Number(btn.dataset.i);
       refresh(); // se o dia virou sem perceber, marca no dia certo
       marks[i] = !marks[i];
-      saveDay(key, marks);
+      saveError.hidden = saveDay(key, marks);
       render();
     });
     document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pageshow', refresh);
+    window.addEventListener('focus', refresh);
 
     render();
     schedule();
@@ -110,6 +114,8 @@ export default {
     return () => {
       clearTimeout(timer);
       document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pageshow', refresh);
+      window.removeEventListener('focus', refresh);
     };
   },
 };

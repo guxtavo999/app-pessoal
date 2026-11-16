@@ -27,7 +27,7 @@ test('loadDay de outro dia começa zerado e não altera o anterior', () => {
 test('JSON inválido ou tamanho errado = 6 false', () => {
   for (const raw of ['{{', '[true]', '"x"', 'null']) {
     const s = fake();
-    s.setItem('agua:2026-11-15', raw);
+    s.setItem('app-pessoal:agua:2026-11-15', raw);
     assert.deepEqual(loadDay('2026-11-15', s), empty);
   }
 });
@@ -45,4 +45,16 @@ test('lastTab ida e volta', () => {
   const s = fake();
   setLastTab('agua', s);
   assert.equal(getLastTab(s), 'agua');
+});
+
+test('saveDay informa se salvou', () => {
+  assert.equal(saveDay('2026-11-15', empty, fake()), true);
+  assert.equal(saveDay('2026-11-15', empty, throwing), false);
+});
+test('chaves com prefixo do app (origem github.io é compartilhada)', () => {
+  const s = fake();
+  saveDay('2026-11-15', empty, s);
+  setLastTab('agua', s);
+  assert.notEqual(s.getItem('app-pessoal:agua:2026-11-15'), null);
+  assert.equal(s.getItem('app-pessoal:ultimaAba'), 'agua');
 });

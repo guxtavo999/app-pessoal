@@ -1,4 +1,5 @@
 const SIZE = 6;
+const PREFIX = 'app-pessoal:'; // a origem <usuario>.github.io é compartilhada com outros projetos
 const blank = () => Array(SIZE).fill(false);
 
 function defaultStore() {
@@ -6,11 +7,18 @@ function defaultStore() {
 }
 
 function read(key, store) {
-  try { return (store ?? defaultStore())?.getItem(key) ?? null; } catch { return null; }
+  try { return (store ?? defaultStore())?.getItem(PREFIX + key) ?? null; } catch { return null; }
 }
 
 function write(key, value, store) {
-  try { (store ?? defaultStore())?.setItem(key, value); } catch { /* armazenamento indisponível */ }
+  try {
+    const s = store ?? defaultStore();
+    if (!s) return false;
+    s.setItem(PREFIX + key, value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function loadDay(key, store) {
@@ -22,7 +30,7 @@ export function loadDay(key, store) {
 }
 
 export function saveDay(key, marks, store) {
-  write('agua:' + key, JSON.stringify(marks.map(Boolean)), store);
+  return write('agua:' + key, JSON.stringify(marks.map(Boolean)), store);
 }
 
 export function getLastTab(store) {
