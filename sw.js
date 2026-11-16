@@ -1,5 +1,5 @@
 // Para publicar uma atualização: aumente CACHE_VERSION.
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE = `app-pessoal-${CACHE_VERSION}`;
 const ASSETS = [
   './',
@@ -10,9 +10,11 @@ const ASSETS = [
   './js/date.js',
   './js/water.js',
   './js/routine.js',
+  './js/agenda.js',
   './js/storage.js',
   './js/tabs/rotina.js',
   './js/tabs/agua.js',
+  './js/tabs/agenda.js',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

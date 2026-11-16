@@ -1,9 +1,10 @@
 import { getLastTab, setLastTab } from './storage.js';
 import rotina from './tabs/rotina.js';
 import agua from './tabs/agua.js';
+import agenda from './tabs/agenda.js';
 
 // Único lugar para registrar abas. Ordem = ordem na barra inferior.
-const TABS = [rotina, agua];
+const TABS = [rotina, agua, agenda];
 
 const view = document.getElementById('view');
 const tabbar = document.getElementById('tabbar');
