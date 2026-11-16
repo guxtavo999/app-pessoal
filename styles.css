@@ -7,6 +7,8 @@
   --water: #2f8cff;
   --water-soft: #e3efff;
   --water-deep: #1667d9;
+  --late: #d93b3b;
+  --late-soft: #fdeaea;
   --tabbar-h: 58px;
   color-scheme: light dark;
 }
@@ -21,6 +23,8 @@
     --water: #4a9dff;
     --water-soft: #16294a;
     --water-deep: #7db8ff;
+    --late: #ff6b6b;
+    --late-soft: #3a1c22;
   }
 }
 
@@ -179,3 +183,52 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .body-figure .empty-fill { fill: var(--water-soft); }
 .body-figure .level { fill: var(--water); transition: y .45s ease, height .45s ease; }
 .body-figure .marks line { stroke: var(--surface); stroke-width: 1.5; opacity: .6; }
+
+/* ---------- Rotina ---------- */
+.routine-count { margin: 0 0 16px; color: var(--muted); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.routine-count.done { color: var(--water); }
+
+.save-error { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: var(--late-soft); color: var(--late); font-size: 14px; font-weight: 600; }
+.save-error[hidden] { display: none; }
+
+.tasks { display: flex; flex-direction: column; gap: 10px; }
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform .12s ease, background-color .2s ease, border-color .2s ease;
+}
+.task:active { transform: scale(.98); }
+
+.task .box {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.task .box svg { width: 20px; height: 20px; opacity: 0; transform: scale(.4); transition: opacity .15s ease, transform .2s ease; }
+.task .label { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; }
+.task .late-tag { display: none; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--late); }
+
+.task[aria-pressed="true"] { background: var(--water-soft); border-color: var(--water); }
+.task[aria-pressed="true"] .box { background: var(--water); border-color: var(--water); }
+.task[aria-pressed="true"] .box svg { opacity: 1; transform: scale(1); }
+.task[aria-pressed="true"] .label { color: var(--water-deep); }
+
+.task.late { background: var(--late-soft); border-color: var(--late); }
+.task.late .box { border-color: var(--late); }
+.task.late .late-tag { display: inline; }
