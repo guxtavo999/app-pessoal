@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import {
   daysUntil, colorFor, upcoming, validate, formatDay, isValidItem, newId,
 } from '../js/agenda.js';
+import { loadAgenda, saveAgenda } from '../js/storage.js';
+
+const fake = () => {
+  const m = new Map();
+  return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)) };
+};
+const throwing = {
+  getItem() { throw new Error('blocked'); },
+  setItem() { throw new Error('blocked'); },
+};
 
 const now = new Date(2026, 10, 16, 15, 0); // segunda, 16/11/2026, 15:00
 
@@ -69,4 +79,34 @@ test('isValidItem', () => {
 
 test('newId não repete', () => {
   assert.equal(new Set(Array.from({ length: 200 }, newId)).size, 200);
+});
+
+test('saveAgenda/loadAgenda ida e volta', () => {
+  const s = fake();
+  const items = [{ id: 'a', date: '2026-11-20', time: '10:00', text: 'Dentista' }];
+  assert.equal(saveAgenda(items, s), true);
+  assert.deepEqual(loadAgenda(s), items);
+  assert.notEqual(s.getItem('app-pessoal:agenda'), null);
+});
+
+test('loadAgenda ignora dado corrompido item a item', () => {
+  for (const raw of ['{{', 'null', '"x"', '{"a":1}']) {
+    const s = fake(); s.setItem('app-pessoal:agenda', raw);
+    assert.deepEqual(loadAgenda(s), []);
+  }
+  const s = fake();
+  s.setItem('app-pessoal:agenda', JSON.stringify([
+    { id: 'ok', date: '2026-11-20', time: '10:00', text: 'A', extra: 1 },
+    { id: 'm', date: '2026-13-40', time: '10:00', text: 'B' },
+    { id: 'h', date: '2026-11-20', time: '25:00', text: 'C' },
+    { date: '2026-11-20', time: '10:00', text: 'D' },
+    7,
+  ]));
+  assert.deepEqual(loadAgenda(s), [{ id: 'ok', date: '2026-11-20', time: '10:00', text: 'A' }]);
+});
+
+test('store que lança ou ausente: nada quebra', () => {
+  assert.deepEqual(loadAgenda(throwing), []);
+  assert.equal(saveAgenda([], throwing), false);
+  assert.deepEqual(loadAgenda(), []);
 });

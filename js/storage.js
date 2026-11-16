@@ -1,4 +1,5 @@
 import { TASKS } from './routine.js';
+import { isValidItem } from './agenda.js';
 
 const SIZE = 6;
 const PREFIX = 'app-pessoal:'; // a origem <usuario>.github.io é compartilhada com outros projetos
@@ -51,6 +52,21 @@ export function saveRoutineDay(key, marks, store) {
   const clean = {};
   for (const { id } of TASKS) if (marks[id] === true) clean[id] = true;
   return write('rotina:' + key, JSON.stringify(clean), store);
+}
+
+// Agenda: lista única de compromissos; itens inválidos são descartados um a um.
+const cleanItem = ({ id, date, time, text }) => ({ id, date, time, text });
+
+export function loadAgenda(store) {
+  try {
+    const data = JSON.parse(read('agenda', store));
+    if (Array.isArray(data)) return data.filter(isValidItem).map(cleanItem);
+  } catch { /* dado corrompido */ }
+  return [];
+}
+
+export function saveAgenda(items, store) {
+  return write('agenda', JSON.stringify(items.filter(isValidItem).map(cleanItem)), store);
 }
 
 export function getLastTab(store) {
