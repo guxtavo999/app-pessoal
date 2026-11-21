@@ -1,9 +1,8 @@
 import { DEFAULT_TASKS, isValidTask } from './routine.js';
 import { isValidItem } from './agenda.js';
+import { DEFAULT_CUPS, isValidCup } from './water.js';
 
-const SIZE = 6;
 const PREFIX = 'app-pessoal:'; // a origem <usuario>.github.io é compartilhada com outros projetos
-const blank = () => Array(SIZE).fill(false);
 
 function defaultStore() {
   try { return globalThis.localStorage ?? null; } catch { return null; }
@@ -24,16 +23,45 @@ function write(key, value, store) {
   }
 }
 
+// Água: marcações do dia por id do copo ({ id: true }).
+// Formato antigo (lista de 6 true/false por posição) é convertido para os ids c1..c6.
 export function loadDay(key, store) {
+  const marks = {};
   try {
     const data = JSON.parse(read('agua:' + key, store));
-    if (Array.isArray(data) && data.length === SIZE) return data.map(v => v === true);
+    if (Array.isArray(data)) {
+      if (data.length === DEFAULT_CUPS.length) {
+        data.forEach((v, i) => { if (v === true) marks[DEFAULT_CUPS[i].id] = true; });
+      }
+    } else if (data && typeof data === 'object') {
+      for (const [id, v] of Object.entries(data)) if (id !== '' && v === true) marks[id] = true;
+    }
   } catch { /* dado corrompido */ }
-  return blank();
+  return marks;
 }
 
 export function saveDay(key, marks, store) {
-  return write('agua:' + key, JSON.stringify(marks.map(Boolean)), store);
+  const clean = {};
+  for (const [id, v] of Object.entries(marks)) if (id !== '' && v === true) clean[id] = true;
+  return write('agua:' + key, JSON.stringify(clean), store);
+}
+
+// Lista de copos da Água, editável pelo app. Sem nada salvo (ou dado ruim) = lista padrão.
+const cleanCup = ({ id, ml }) => ({ id, ml });
+
+export function loadCups(store) {
+  try {
+    const data = JSON.parse(read('agua:copos', store));
+    if (Array.isArray(data)) {
+      const cups = data.filter(isValidCup).map(cleanCup);
+      if (cups.length > 0) return cups;
+    }
+  } catch { /* dado corrompido */ }
+  return DEFAULT_CUPS.map(cleanCup);
+}
+
+export function saveCups(cups, store) {
+  return write('agua:copos', JSON.stringify(cups.filter(isValidCup).map(cleanCup)), store);
 }
 
 // Rotina: marcações guardadas por id da tarefa ({ id: true }), não por posição.
