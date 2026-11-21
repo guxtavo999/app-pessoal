@@ -20,3 +20,13 @@ Organizador pessoal para iPhone que funciona offline: abas Rotina, Água e Agend
 - Ícones: `node tools/make-icons.mjs`
 - Nova aba: criar `js/tabs/<nome>.js` (exporta `{ id, label, icon, mount }`), registrar em `TABS` em `js/app.js` e adicionar o arquivo em `ASSETS` no `sw.js`.
 - Publicar atualização: aumentar `CACHE_VERSION` no `sw.js` e enviar ao GitHub. O iPhone aplica na próxima abertura.
+
+## Sincronizar vários computadores
+
+Cada computador baixa sozinho as atualizações do GitHub a cada 5 minutos (tarefa agendada do Windows).
+
+- Ativar (uma vez por computador): `powershell -ExecutionPolicy Bypass -File tools\install-sync.ps1`
+- Desativar: `powershell -ExecutionPolicy Bypass -File tools\install-sync.ps1 -Uninstall`
+- Histórico: `.git\auto-sync.log`
+- Enviar continua manual: `git add .` → `git commit -m "..."` → `git push`.
+- Se houver alterações locais não enviadas, a atualização automática é pulada (nada é sobrescrito) e o motivo aparece no log.
