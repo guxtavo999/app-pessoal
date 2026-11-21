@@ -1,4 +1,4 @@
-import { TASKS } from './routine.js';
+import { DEFAULT_TASKS, isValidTask } from './routine.js';
 import { isValidItem } from './agenda.js';
 
 const SIZE = 6;
@@ -37,12 +37,15 @@ export function saveDay(key, marks, store) {
 }
 
 // Rotina: marcações guardadas por id da tarefa ({ id: true }), não por posição.
+// Ids de tarefas que não existem mais são ignorados na tela; aqui só se filtra o formato.
+const ID_OK = id => typeof id === 'string' && id !== '';
+
 export function loadRoutineDay(key, store) {
   const marks = {};
   try {
     const data = JSON.parse(read('rotina:' + key, store));
     if (data && typeof data === 'object' && !Array.isArray(data)) {
-      for (const { id } of TASKS) if (data[id] === true) marks[id] = true;
+      for (const [id, v] of Object.entries(data)) if (ID_OK(id) && v === true) marks[id] = true;
     }
   } catch { /* dado corrompido */ }
   return marks;
@@ -50,8 +53,26 @@ export function loadRoutineDay(key, store) {
 
 export function saveRoutineDay(key, marks, store) {
   const clean = {};
-  for (const { id } of TASKS) if (marks[id] === true) clean[id] = true;
+  for (const [id, v] of Object.entries(marks)) if (ID_OK(id) && v === true) clean[id] = true;
   return write('rotina:' + key, JSON.stringify(clean), store);
+}
+
+// Lista de tarefas da Rotina, editável pelo app. Sem nada salvo = lista padrão.
+const cleanTask = ({ id, time, text }) => ({ id, time, text });
+const defaults = () => DEFAULT_TASKS.map(cleanTask);
+
+export function loadRoutineTasks(store) {
+  const raw = read('rotina:tarefas', store);
+  if (raw === null) return defaults();
+  try {
+    const data = JSON.parse(raw);
+    if (Array.isArray(data)) return data.filter(isValidTask).map(cleanTask);
+  } catch { /* dado corrompido */ }
+  return defaults();
+}
+
+export function saveRoutineTasks(tasks, store) {
+  return write('rotina:tarefas', JSON.stringify(tasks.filter(isValidTask).map(cleanTask)), store);
 }
 
 // Agenda: lista única de compromissos; itens inválidos são descartados um a um.
