@@ -10,21 +10,21 @@ const throwing = {
   getItem() { throw new Error('blocked'); },
   setItem() { throw new Error('blocked'); },
 };
-const empty = Array(6).fill(false);
+const empty = {};
 
-test('loadDay sem dado = 6 false', () => assert.deepEqual(loadDay('2026-11-15', fake()), empty));
+test('loadDay sem dado = {}', () => assert.deepEqual(loadDay('2026-11-15', fake()), empty));
 test('saveDay/loadDay ida e volta', () => {
   const s = fake();
-  saveDay('2026-11-15', [true, false, false, false, false, true], s);
-  assert.deepEqual(loadDay('2026-11-15', s), [true, false, false, false, false, true]);
+  saveDay('2026-11-15', { c1: true, c6: true }, s);
+  assert.deepEqual(loadDay('2026-11-15', s), { c1: true, c6: true });
 });
 test('loadDay de outro dia começa zerado e não altera o anterior', () => {
   const s = fake();
-  saveDay('2026-11-15', Array(6).fill(true), s);
+  saveDay('2026-11-15', { c1: true, c2: true }, s);
   assert.deepEqual(loadDay('2026-11-16', s), empty);
-  assert.deepEqual(loadDay('2026-11-15', s), Array(6).fill(true));
+  assert.deepEqual(loadDay('2026-11-15', s), { c1: true, c2: true });
 });
-test('JSON inválido ou tamanho errado = 6 false', () => {
+test('JSON inválido ou tamanho errado = {}', () => {
   for (const raw of ['{{', '[true]', '"x"', 'null']) {
     const s = fake();
     s.setItem('app-pessoal:agua:2026-11-15', raw);
