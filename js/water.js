@@ -1,4 +1,6 @@
-export const GOAL_ML = 4000;
+export const DEFAULT_GOAL_ML = 4000;
+export const MIN_GOAL_ML = 100;
+export const MAX_GOAL_ML = 20000;
 export const MAX_CUPS = 20;
 export const MAX_ML = 5000;
 
@@ -18,16 +20,28 @@ export function totalMl(cups, marks) {
   return cups.reduce((sum, cup) => sum + (marks[cup.id] === true ? cup.ml : 0), 0);
 }
 
-export function fillRatio(total) {
-  return Math.max(0, Math.min(total, GOAL_ML)) / GOAL_ML;
+export function fillRatio(total, goal) {
+  return Math.max(0, Math.min(total, goal)) / goal;
 }
 
 export function formatLiters(ml) {
   return String(Math.round(ml / 10) / 100).replace('.', ',');
 }
 
-export function formatProgress(ml) {
-  return `${formatLiters(ml)} / ${formatLiters(GOAL_ML)} L`;
+export function formatProgress(ml, goal) {
+  return `${formatLiters(ml)} / ${formatLiters(goal)} L`;
+}
+
+export function isValidGoal(ml) {
+  return Number.isInteger(ml) && ml >= MIN_GOAL_ML && ml <= MAX_GOAL_ML;
+}
+
+// Meta digitada em litros ("4", "3,5", "2.25") → ml inteiro, ou null se inválida.
+export function parseGoal(text) {
+  const t = String(text ?? '').trim().replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(t)) return null;
+  const ml = Math.round(Number(t) * 1000);
+  return isValidGoal(ml) ? ml : null;
 }
 
 // Texto do quadrado: abaixo de 1 L em ml, a partir de 1 L em litros.

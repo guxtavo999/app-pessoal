@@ -1,6 +1,6 @@
 import { todayKey, msUntilMidnight } from '../date.js';
-import { GOAL_ML, MAX_CUPS, MAX_ML, totalMl, fillRatio, formatLiters, formatProgress, cupLabel, validateCups, newCupId } from '../water.js';
-import { loadDay, saveDay, loadCups, saveCups } from '../storage.js';
+import { MAX_CUPS, MAX_ML, MIN_GOAL_ML, MAX_GOAL_ML, totalMl, fillRatio, formatLiters, formatProgress, cupLabel, validateCups, parseGoal, newCupId } from '../water.js';
+import { loadDay, saveDay, loadCups, saveCups, loadGoal, saveGoal } from '../storage.js';
 
 const TOP = 6;      // topo da cabeça no SVG
 const BOTTOM = 212; // sola dos pés no SVG
@@ -11,9 +11,10 @@ const TRASH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14
 
 const BODY_PATH = 'M44 38L56 38L56 44C70 45 80 48 82 60L90 118Q91 124 85 124Q80 124 79 118L72 74L72 130L70 206Q70 212 64 212Q58 212 57 206L52 136L48 136L43 206Q42 212 36 212Q30 212 30 206L28 130L28 74L21 118Q20 124 15 124Q9 124 10 118L18 60C20 48 30 45 44 44Z';
 
+// Linhas no boneco a cada 1/4 da meta (com 4 L: 1, 2 e 3 L, como antes).
 const figureSvg = () => {
-  const marks = [1000, 2000, 3000].map(ml => {
-    const y = BOTTOM - (ml / GOAL_ML) * H;
+  const marks = [0.25, 0.5, 0.75].map(part => {
+    const y = BOTTOM - part * H;
     return `<line x1="0" x2="100" y1="${y}" y2="${y}"/>`;
   }).join('');
   return `
@@ -43,8 +44,10 @@ export default {
     let key = todayKey();
     let marks = loadDay(key);
     let cups = loadCups();
-    let mode = 'list'; // 'list' (marcar) | 'edit' (copos)
+    let goal = loadGoal();
+    let mode = 'list'; // 'list' (marcar) | 'edit' (meta e copos)
     let drafts = [];   // copos em edição: { id, ml (texto digitado) }
+    let goalDraft = ''; // meta em edição, em litros (texto digitado)
     let saveFailed = false;
     let timer = null;
 
@@ -67,12 +70,12 @@ export default {
 
       const total = totalMl(cups, marks);
       const totalBox = el.querySelector('.water-total');
-      totalBox.querySelector('strong').textContent = formatProgress(total);
-      totalBox.querySelector('span').textContent = total >= GOAL_ML
+      totalBox.querySelector('strong').textContent = formatProgress(total, goal);
+      totalBox.querySelector('span').textContent = total >= goal
         ? 'Meta do dia atingida'
-        : `Faltam ${formatLiters(GOAL_ML - total)} L`;
-      totalBox.classList.toggle('done', total >= GOAL_ML);
-      const h = fillRatio(total) * H;
+        : `Faltam ${formatLiters(goal - total)} L`;
+      totalBox.classList.toggle('done', total >= goal);
+      const h = fillRatio(total, goal) * H;
       const level = el.querySelector('.level');
       level.setAttribute('y', String(BOTTOM - h));
       level.setAttribute('height', String(h));
@@ -81,9 +84,14 @@ export default {
     function renderEdit(error = null) {
       mode = 'edit';
       el.innerHTML = `
-        <header class="page-head"><h1>Editar copos</h1></header>
-        <p class="routine-hint">Escolha quantos quadrados aparecem e quantos ml vale cada um.</p>
+        <header class="page-head"><h1>Editar água</h1></header>
+        <p class="routine-hint">Escolha a meta do dia, quantos quadrados aparecem e quantos ml vale cada um.</p>
         <form class="cups-form" novalidate>
+          <div class="cup-row goal-row">
+            <span class="cup-name">Meta do dia</span>
+            <span class="ml-input"><input type="text" inputmode="decimal" name="goal" aria-label="Meta do dia em litros"><span>L</span></span>
+          </div>
+          <h2 class="form-section">Copos</h2>
           <div class="cup-rows">
             ${drafts.map((d, i) => `
               <div class="cup-row">
@@ -100,12 +108,15 @@ export default {
           </div>
         </form>`;
       el.querySelectorAll('input[name="ml"]').forEach(input => { input.value = drafts[Number(input.dataset.i)].ml; });
+      el.querySelector('input[name="goal"]').value = goalDraft;
       if (error) el.querySelector('.form-error').textContent = error;
     }
 
     // Guarda o que já foi digitado antes de redesenhar o formulário.
     function readDrafts() {
       el.querySelectorAll('input[name="ml"]').forEach(input => { drafts[Number(input.dataset.i)].ml = input.value; });
+      const goalInput = el.querySelector('input[name="goal"]');
+      if (goalInput) goalDraft = goalInput.value;
     }
 
     function onClick(e) {
@@ -114,6 +125,7 @@ export default {
       const act = btn.dataset.act;
       if (act === 'edit') {
         drafts = cups.map(c => ({ id: c.id, ml: String(c.ml) }));
+        goalDraft = formatLiters(goal);
         return renderEdit();
       }
       if (act === 'cancel') return renderList();
@@ -140,10 +152,14 @@ export default {
     function onSubmit(e) {
       e.preventDefault();
       readDrafts();
+      const newGoal = parseGoal(goalDraft);
+      if (newGoal === null) return renderEdit(`A meta precisa ficar entre ${formatLiters(MIN_GOAL_ML)} e ${formatLiters(MAX_GOAL_ML)} L.`);
       const error = validateCups(drafts);
       if (error) return renderEdit(error);
+      goal = newGoal;
       cups = drafts.map(d => ({ id: d.id, ml: Number(String(d.ml).trim()) }));
       saveFailed = !saveCups(cups);
+      if (!saveGoal(goal)) saveFailed = true;
       // Marcação de copo removido não conta mais: sai do dia.
       const ids = new Set(cups.map(c => c.id));
       const stale = Object.keys(marks).filter(id => !ids.has(id));

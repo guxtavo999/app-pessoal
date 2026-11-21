@@ -1,6 +1,6 @@
 import { DEFAULT_TASKS, isValidTask } from './routine.js';
 import { isValidItem } from './agenda.js';
-import { DEFAULT_CUPS, isValidCup } from './water.js';
+import { DEFAULT_CUPS, DEFAULT_GOAL_ML, isValidCup, isValidGoal } from './water.js';
 
 const PREFIX = 'app-pessoal:'; // a origem <usuario>.github.io é compartilhada com outros projetos
 
@@ -62,6 +62,20 @@ export function loadCups(store) {
 
 export function saveCups(cups, store) {
   return write('agua:copos', JSON.stringify(cups.filter(isValidCup).map(cleanCup)), store);
+}
+
+// Meta diária da Água em ml. Sem nada salvo (ou dado ruim) = 4 L.
+export function loadGoal(store) {
+  try {
+    const ml = JSON.parse(read('agua:meta', store));
+    if (isValidGoal(ml)) return ml;
+  } catch { /* dado corrompido */ }
+  return DEFAULT_GOAL_ML;
+}
+
+export function saveGoal(ml, store) {
+  if (!isValidGoal(ml)) return false;
+  return write('agua:meta', JSON.stringify(ml), store);
 }
 
 // Rotina: marcações guardadas por id da tarefa ({ id: true }), não por posição.

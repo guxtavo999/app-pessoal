@@ -378,4 +378,6 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
   border-radius: 12px;
 }
 .cups-form .btn.wide { margin-top: 0; }
+.goal-row { padding-right: 62px; } /* alinha o campo com os dos copos (sem lixeira) */
+.form-section { margin: 4px 0 -6px; font-size: 14px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .btn:disabled { opacity: .4; cursor: default; }

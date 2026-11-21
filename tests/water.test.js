@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULT_CUPS, GOAL_ML, totalMl, fillRatio, formatLiters, formatProgress, cupLabel, isValidCup, validateCups, newCupId } from '../js/water.js';
-import { loadDay, saveDay, loadCups, saveCups } from '../js/storage.js';
+import { DEFAULT_CUPS, DEFAULT_GOAL_ML, totalMl, fillRatio, formatLiters, formatProgress, cupLabel, isValidCup, validateCups, parseGoal, newCupId } from '../js/water.js';
+import { loadDay, saveDay, loadCups, saveCups, loadGoal, saveGoal } from '../js/storage.js';
 import agua from '../js/tabs/agua.js';
 
 const fake = () => {
@@ -18,16 +18,17 @@ test('DEFAULT_CUPS tem 3×910 e 3×1000 com ids c1..c6', () => {
   assert.deepEqual(DEFAULT_CUPS.map(c => c.ml), [910, 910, 910, 1000, 1000, 1000]);
   assert.deepEqual(DEFAULT_CUPS.map(c => c.id), ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']);
   assert.deepEqual(DEFAULT_CUPS.map(c => cupLabel(c.ml)), ['910 ml', '910 ml', '910 ml', '1 L', '1 L', '1 L']);
-  assert.equal(GOAL_ML, 4000);
+  assert.equal(DEFAULT_GOAL_ML, 4000);
 });
 test('totalMl soma só os marcados (por id)', () =>
   assert.equal(totalMl(DEFAULT_CUPS, { c1: true, c2: true, c6: true, c3: false }), 2820));
 test('todos marcados = 5730', () => assert.equal(totalMl(DEFAULT_CUPS, all(DEFAULT_CUPS)), 5730));
 test('totalMl ignora marcação de copo que não existe', () => assert.equal(totalMl([{ id: 'a', ml: 500 }], { a: true, sumiu: true }), 500));
 test('fillRatio 0, parcial, teto em 1', () => {
-  assert.equal(fillRatio(0), 0);
-  assert.equal(fillRatio(2000), 0.5);
-  assert.equal(fillRatio(5730), 1);
+  assert.equal(fillRatio(0, 4000), 0);
+  assert.equal(fillRatio(2000, 4000), 0.5);
+  assert.equal(fillRatio(5730, 4000), 1);
+  assert.equal(fillRatio(1500, 3000), 0.5);
 });
 test('formatLiters', () => {
   assert.equal(formatLiters(0), '0');
@@ -37,8 +38,35 @@ test('formatLiters', () => {
   assert.equal(formatLiters(4000), '4');
 });
 test('formatProgress acima da meta continua contando', () => {
-  assert.equal(formatProgress(2820), '2,82 / 4 L');
-  assert.equal(formatProgress(5730), '5,73 / 4 L');
+  assert.equal(formatProgress(2820, 4000), '2,82 / 4 L');
+  assert.equal(formatProgress(5730, 4000), '5,73 / 4 L');
+  assert.equal(formatProgress(1000, 2500), '1 / 2,5 L');
+});
+
+// ---------- meta ----------
+test('parseGoal: litros com vírgula ou ponto viram ml', () => {
+  assert.equal(parseGoal('4'), 4000);
+  assert.equal(parseGoal(' 3,5 '), 3500);
+  assert.equal(parseGoal('2.25'), 2250);
+  assert.equal(parseGoal('0,1'), 100);
+  assert.equal(parseGoal('20'), 20000);
+});
+test('parseGoal: recusa vazio, texto, zero, negativo e fora dos limites', () => {
+  for (const t of ['', 'abc', '0', '-2', '0,05', '20,5', '1,2,3', '3 L']) assert.equal(parseGoal(t), null, t);
+});
+test('loadGoal/saveGoal: padrão 4 L, ida e volta, dado ruim volta ao padrão', () => {
+  const s = fake();
+  assert.equal(loadGoal(s), 4000);
+  assert.equal(saveGoal(3000, s), true);
+  assert.equal(loadGoal(s), 3000);
+  assert.equal(s.getItem('app-pessoal:agua:meta'), '3000');
+  assert.equal(saveGoal(0, s), false);
+  for (const raw of ['{{', '"3000"', '50', '99999', '2.5']) {
+    s.setItem('app-pessoal:agua:meta', raw);
+    assert.equal(loadGoal(s), 4000, raw);
+  }
+  assert.equal(loadGoal(throwing), 4000);
+  assert.equal(saveGoal(3000, throwing), false);
 });
 test('cupLabel: ml abaixo de 1 L, litros a partir de 1 L', () => {
   assert.equal(cupLabel(250), '250 ml');
