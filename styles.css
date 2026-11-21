@@ -241,6 +241,56 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .task.late .box { border-color: var(--late); }
 .task.late .late-tag { display: inline; }
 
+.task .label .time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.task[aria-pressed="true"] .label .time { color: inherit; }
+.task.late .label .time { color: var(--late); }
+
+.routine-hint { margin: -8px 0 16px; color: var(--muted); font-size: 14px; font-weight: 600; }
+
+.task-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 6px 8px 6px 4px;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.task-edit .task-open {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 10px;
+  text-align: left;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.task-edit .label { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.task-edit .label .time { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.icon-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  cursor: pointer;
+}
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn:disabled { opacity: .3; cursor: default; }
+
+.btn.wide { width: 100%; margin-top: 16px; }
+.empty-inline.small { margin: 8vh 0; }
+
+.time-row { display: flex; gap: 10px; }
+.time-row input { flex: 1; min-width: 0; }
+.time-row .btn { flex: none; color: var(--text); font-size: 15px; }
+
 /* ---------- Agenda ---------- */
 .btn {
   min-height: 44px;
